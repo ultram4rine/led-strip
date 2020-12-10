@@ -13,16 +13,16 @@ impl Controller {
         let dev = hal::I2cdev::new("/dev/i2c-1").unwrap();
         let address = Address::default();
 
-        let mut pwm = Pca9685::new(dev, address).unwrap();
+        let pwm = Pca9685::new(dev, address).unwrap();
 
         Controller { pwm: pwm }
     }
 
     pub fn enable(&mut self) {
-        self.pwm.enable();
+        self.pwm.enable().unwrap();
     }
     pub fn disable(&mut self) {
-        self.pwm.disable();
+        self.pwm.disable().unwrap();
     }
 
     pub fn apply(&mut self, led: LED) {
