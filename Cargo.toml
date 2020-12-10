@@ -8,3 +8,6 @@ edition = "2018"
 
 [dependencies]
 pwm-pca9685 = "0.3.0"
+linux-embedded-hal = "0.3.0"
+tokio = { version = "0.2", features = ["full"] }
+warp = "0.2"
