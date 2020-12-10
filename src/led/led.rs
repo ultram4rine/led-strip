@@ -41,11 +41,11 @@ impl LED {
     }
 }
 
-pub fn cie1931(b: f64) -> u16 {
+pub fn cie1931(mut b: f64) -> u16 {
     let led_max = 4095_f64;
 
     if b <= 8.0 {
-        b / 902.3 * led_max;
+        b = b / 902.3 * led_max;
     }
 
     let mut x = b + 16_f64 / 116_f64;
