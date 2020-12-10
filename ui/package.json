@@ -17,6 +17,8 @@
     "svelte": "^3.0.0"
   },
   "dependencies": {
-    "sirv-cli": "^1.0.0"
+    "@fortawesome/free-solid-svg-icons": "^5.15.1",
+    "sirv-cli": "^1.0.0",
+    "svelte-awesome": "^2.3.0"
   }
 }
