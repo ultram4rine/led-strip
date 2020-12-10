@@ -1,4 +1,5 @@
 #![deny(warnings)]
+mod api;
 mod controller;
 mod led;
 
