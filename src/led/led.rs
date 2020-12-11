@@ -1,3 +1,5 @@
+use serde::{Deserialize, Serialize};
+
 pub enum Color {
     White,
     Red,
@@ -5,6 +7,7 @@ pub enum Color {
     Blue,
 }
 
+#[derive(Deserialize, Serialize)]
 pub struct LED {
     pub white: f64,
     pub red: f64,

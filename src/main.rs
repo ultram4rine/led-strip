@@ -3,11 +3,9 @@ mod api;
 mod controller;
 mod led;
 
-use warp::Filter;
+use crate::api::api::color_routes;
 
 #[tokio::main]
 async fn main() {
-    let routes = warp::path!("hello" / String).map(|name| format!("Hello, {}!", name));
-
-    warp::serve(routes).run(([127, 0, 0, 1], 3030)).await;
+    warp::serve(color_routes).run(([127, 0, 0, 1], 3030)).await;
 }
