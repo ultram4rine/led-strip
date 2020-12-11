@@ -12,7 +12,7 @@
   main {
     text-align: center;
     padding: 1em;
-    max-width: 240px;
+    min-height: calc(100% - 2em);
     margin: 0 auto;
     background: linear-gradient(var(--color), #181616);
   }
