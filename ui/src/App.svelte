@@ -16,12 +16,6 @@
     margin: 0 auto;
     background: linear-gradient(var(--color), #181616);
   }
-
-  @media (min-width: 640px) {
-    main {
-      max-width: none;
-    }
-  }
 </style>
 
 <main style="--color: {color}">
