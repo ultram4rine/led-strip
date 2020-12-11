@@ -1,5 +1,11 @@
 <script>
+  import { HsvPicker } from "svelte-color-picker";
   import Button from "./Button.svelte";
+
+  let color = "#fbfbfb";
+  const setBackgroundColor = (rgba) => {
+    color = `rgba(${rgba.detail.r}, ${rgba.detail.g}, ${rgba.detail.b}, ${rgba.detail.a})`;
+  };
 </script>
 
 <style>
@@ -8,13 +14,7 @@
     padding: 1em;
     max-width: 240px;
     margin: 0 auto;
-  }
-
-  h1 {
-    color: #ff3e00;
-    text-transform: uppercase;
-    font-size: 4em;
-    font-weight: 100;
+    background: linear-gradient(var(--color), #181616);
   }
 
   @media (min-width: 640px) {
@@ -24,6 +24,7 @@
   }
 </style>
 
-<main>
+<main style="--color: {color}">
   <Button />
+  <HsvPicker on:colorChange={setBackgroundColor} startColor={color} />
 </main>
