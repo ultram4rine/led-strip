@@ -9,7 +9,7 @@ extern crate pwm_pca9685 as pca9685;
 use crate::controller::controller::Controller;
 use crate::led::led::LED;
 use std::convert::Infallible;
-use warp::{http, Filter};
+use warp::{http::StatusCode, Filter};
 
 #[tokio::main]
 async fn main() {
@@ -31,6 +31,8 @@ fn color(
 }
 
 async fn apply_color(led: LED, mut controller: Controller) -> Result<impl warp::Reply, Infallible> {
-    controller.apply(led).await;
-    Ok(http::StatusCode::OK)
+    match controller.apply(led).await {
+        Ok(()) => return Ok(StatusCode::OK),
+        Err(_) => return Ok(StatusCode::INTERNAL_SERVER_ERROR),
+    };
 }
