@@ -81,5 +81,5 @@
   <div id="btn-bg" class:active on:click={handlePowerToggle}>
     <Icon data={faPowerOff} scale="3" style="vertical-align: middle;" />
   </div>
-  <HsvPicker on:colorChange={setBackgroundColor} startColor={color} />
+  <HsvPicker on:colorChange={setBackgroundColor} startColor={lastColor} />
 </main>
