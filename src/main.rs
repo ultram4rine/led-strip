@@ -3,9 +3,6 @@
 mod controller;
 mod led;
 
-extern crate linux_embedded_hal as hal;
-extern crate pwm_pca9685 as pca9685;
-
 use crate::controller::controller::Controller;
 use crate::led::led::LED;
 use std::convert::Infallible;
@@ -17,7 +14,9 @@ async fn main() {
 
     let routes = color(controller.clone()).with(warp::cors().allow_any_origin());
 
-    warp::serve(routes).run(([0, 0, 0, 0], 3030)).await;
+    warp::serve(warp::fs::dir("ui/public").or(routes))
+        .run(([0, 0, 0, 0], 3030))
+        .await;
 }
 
 fn color(
