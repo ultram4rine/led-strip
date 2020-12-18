@@ -18,6 +18,22 @@
 
   const setBackgroundColor = (rgba) => {
     color = `rgba(${rgba.detail.r}, ${rgba.detail.g}, ${rgba.detail.b}, ${rgba.detail.a})`;
+    fetch("/color", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        white: rgba.detail.a,
+        red: rgba.detail.r,
+        green: rgba.detail.g,
+        blue: rgba.detail.b,
+      }),
+    }).then((resp) => {
+      if (!resp.ok) {
+        alert(`Something wrong: ${resp.statusText} ${resp.status}`);
+      }
+    });
   };
 </script>
 
