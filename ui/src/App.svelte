@@ -11,8 +11,22 @@
     active = !active;
     if (!active) {
       lastColor = color;
+      fetch("/disable", {
+        method: "POST",
+      }).then((resp) => {
+        if (!resp.ok) {
+          alert(`Something wrong: ${resp.statusText} ${resp.status}`);
+        }
+      });
     } else {
       color = lastColor;
+      fetch("/enable", {
+        method: "POST",
+      }).then((resp) => {
+        if (!resp.ok) {
+          alert(`Something wrong: ${resp.statusText} ${resp.status}`);
+        }
+      });
     }
   };
 
