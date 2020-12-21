@@ -67,6 +67,9 @@ async fn disable_led(mut controller: Controller) -> Result<impl warp::Reply, Inf
 async fn apply_color(led: LED, mut controller: Controller) -> Result<impl warp::Reply, Infallible> {
     match controller.apply(led).await {
         Ok(()) => return Ok(StatusCode::OK),
-        Err(_) => return Ok(StatusCode::INTERNAL_SERVER_ERROR),
+        Err(e) => {
+            println!("{:?}", e);
+            return Ok(StatusCode::INTERNAL_SERVER_ERROR);
+        }
     };
 }
