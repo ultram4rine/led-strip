@@ -9,23 +9,23 @@ pub enum Color {
 
 #[derive(Deserialize, Serialize)]
 pub struct LED {
-    pub white: f64,
-    pub red: f64,
-    pub green: f64,
-    pub blue: f64,
+    pub white: u8,
+    pub red: u8,
+    pub green: u8,
+    pub blue: u8,
 }
 
 impl LED {
     pub fn new() -> Self {
         LED {
-            white: 0.0,
-            red: 0.0,
-            green: 0.0,
-            blue: 0.0,
+            white: 0,
+            red: 0,
+            green: 0,
+            blue: 0,
         }
     }
 
-    pub fn set_brightness(&mut self, color: Color, val: f64) {
+    pub fn set_brightness(&mut self, color: Color, val: u8) {
         match color {
             Color::White => self.white = val,
             Color::Red => self.red = val,
@@ -34,7 +34,7 @@ impl LED {
         }
     }
 
-    pub fn get_brightness(&mut self, color: Color) -> f64 {
+    pub fn get_brightness(&mut self, color: Color) -> u8 {
         match color {
             Color::White => self.white,
             Color::Red => self.red,
@@ -44,15 +44,8 @@ impl LED {
     }
 }
 
-pub fn cie1931(mut b: f64) -> u16 {
-    let led_max = 4095_f64;
-
-    if b <= 8.0 {
-        b = b / 902.3 * led_max;
-    }
-
-    let mut x = b + 16_f64 / 116_f64;
-    x = x * x * x;
-
-    (x * led_max) as u16
+pub fn convert8to12(x: u8) -> u16 {
+    let a: u32 = x as u32 * ((1 << 12) - 1);
+    let b: u32 = (1 << 8) - 1;
+    (a / b) as u16
 }

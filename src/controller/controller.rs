@@ -1,7 +1,7 @@
 extern crate linux_embedded_hal as hal;
 extern crate pwm_pca9685 as pca9685;
 
-use crate::led::led::{cie1931, Color, LED};
+use crate::led::led::{convert8to12, Color, LED};
 use hal::I2cdev;
 use pca9685::{Address, Channel, Pca9685};
 use std::sync::Arc;
@@ -54,34 +54,34 @@ impl Controller {
     async fn set_brightness(
         &mut self,
         color: Color,
-        val: f64,
+        val: u8,
     ) -> Result<(), pca9685::Error<hal::i2cdev::linux::LinuxI2CError>> {
         let mut pwm = self.pwm.lock().await;
 
         match color {
             Color::White => {
-                pwm.set_channel_on_off(Channel::C0, 0, cie1931(val))?;
-                pwm.set_channel_on_off(Channel::C4, 0, cie1931(val))?;
-                pwm.set_channel_on_off(Channel::C8, 0, cie1931(val))?;
-                pwm.set_channel_on_off(Channel::C12, 0, cie1931(val))?;
+                pwm.set_channel_on_off(Channel::C0, 0, convert8to12(val))?;
+                pwm.set_channel_on_off(Channel::C4, 0, convert8to12(val))?;
+                pwm.set_channel_on_off(Channel::C8, 0, convert8to12(val))?;
+                pwm.set_channel_on_off(Channel::C12, 0, convert8to12(val))?;
             }
             Color::Red => {
-                pwm.set_channel_on_off(Channel::C1, 0, cie1931(val))?;
-                pwm.set_channel_on_off(Channel::C5, 0, cie1931(val))?;
-                pwm.set_channel_on_off(Channel::C9, 0, cie1931(val))?;
-                pwm.set_channel_on_off(Channel::C13, 0, cie1931(val))?;
+                pwm.set_channel_on_off(Channel::C1, 0, convert8to12(val))?;
+                pwm.set_channel_on_off(Channel::C5, 0, convert8to12(val))?;
+                pwm.set_channel_on_off(Channel::C9, 0, convert8to12(val))?;
+                pwm.set_channel_on_off(Channel::C13, 0, convert8to12(val))?;
             }
             Color::Green => {
-                pwm.set_channel_on_off(Channel::C2, 0, cie1931(val))?;
-                pwm.set_channel_on_off(Channel::C6, 0, cie1931(val))?;
-                pwm.set_channel_on_off(Channel::C10, 0, cie1931(val))?;
-                pwm.set_channel_on_off(Channel::C14, 0, cie1931(val))?;
+                pwm.set_channel_on_off(Channel::C2, 0, convert8to12(val))?;
+                pwm.set_channel_on_off(Channel::C6, 0, convert8to12(val))?;
+                pwm.set_channel_on_off(Channel::C10, 0, convert8to12(val))?;
+                pwm.set_channel_on_off(Channel::C14, 0, convert8to12(val))?;
             }
             Color::Blue => {
-                pwm.set_channel_on_off(Channel::C3, 0, cie1931(val))?;
-                pwm.set_channel_on_off(Channel::C7, 0, cie1931(val))?;
-                pwm.set_channel_on_off(Channel::C11, 0, cie1931(val))?;
-                pwm.set_channel_on_off(Channel::C15, 0, cie1931(val))?;
+                pwm.set_channel_on_off(Channel::C3, 0, convert8to12(val))?;
+                pwm.set_channel_on_off(Channel::C7, 0, convert8to12(val))?;
+                pwm.set_channel_on_off(Channel::C11, 0, convert8to12(val))?;
+                pwm.set_channel_on_off(Channel::C15, 0, convert8to12(val))?;
             }
         }
 
