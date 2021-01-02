@@ -5,21 +5,46 @@ mod led;
 
 use crate::controller::controller::Controller;
 use crate::led::led::LED;
+use serde::{Deserialize, Serialize};
 use std::convert::Infallible;
+use std::env;
 use warp::{http::StatusCode, Filter};
+
+#[derive(Clone, Deserialize, Serialize)]
+struct Credentials {
+    username: String,
+    password: String,
+}
 
 #[tokio::main]
 async fn main() {
     let controller = Controller::new();
 
-    let routes = enable(controller.clone())
-        .or(disable(controller.clone()))
-        .or(color(controller.clone()))
-        .with(warp::cors().allow_any_origin());
+    let admin_user = env::var("LED_USER").unwrap();
+    let admin_pass = env::var("LED_PASS").unwrap();
+
+    let routes = login(Credentials {
+        username: admin_user,
+        password: admin_pass,
+    })
+    .or(enable(controller.clone()))
+    .or(disable(controller.clone()))
+    .or(color(controller.clone()))
+    .with(warp::cors().allow_any_origin());
 
     warp::serve(warp::fs::dir("ui/public").or(routes))
         .run(([0, 0, 0, 0], 3030))
         .await;
+}
+
+fn login(
+    admin: Credentials,
+) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
+    warp::path!("login")
+        .and(warp::post())
+        .and(warp::body::json())
+        .and(warp::any().map(move || admin.clone()))
+        .and_then(auth)
 }
 
 fn enable(
@@ -48,6 +73,13 @@ fn color(
         .and(warp::body::json())
         .and(warp::any().map(move || controller.clone()))
         .and_then(apply_color)
+}
+
+async fn auth(user: Credentials, admin: Credentials) -> Result<impl warp::Reply, Infallible> {
+    match user.username == admin.username && user.password == admin.password {
+        true => return Ok(StatusCode::OK),
+        false => return Ok(StatusCode::UNAUTHORIZED),
+    }
 }
 
 async fn enable_led(mut controller: Controller) -> Result<impl warp::Reply, Infallible> {
