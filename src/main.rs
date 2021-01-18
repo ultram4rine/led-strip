@@ -29,7 +29,7 @@ async fn main() {
     })
     .or(enable(controller.clone()))
     .or(disable(controller.clone()))
-    .or(color(controller.clone()))
+    .or(set_color(controller.clone()))
     .with(warp::cors().allow_any_origin());
 
     warp::serve(warp::fs::dir("ui/public").or(routes))
@@ -65,7 +65,7 @@ fn disable(
         .and_then(disable_led)
 }
 
-fn color(
+fn set_color(
     controller: Controller,
 ) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
     warp::path!("color")
@@ -97,7 +97,9 @@ async fn disable_led(mut controller: Controller) -> Result<impl warp::Reply, Inf
 }
 
 async fn apply_color(led: LED, mut controller: Controller) -> Result<impl warp::Reply, Infallible> {
-    match controller.apply(led).await {
+    controller.led = led;
+
+    match controller.apply().await {
         Ok(()) => return Ok(StatusCode::OK),
         Err(e) => {
             println!("{:?}", e);

@@ -4,12 +4,16 @@ extern crate pwm_pca9685 as pca9685;
 use crate::led::led::{convert8to12, Color, LED};
 use hal::I2cdev;
 use pca9685::{Address, Channel, Pca9685};
+use serde::Serialize;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 
-#[derive(Clone)]
+#[derive(Clone, Serialize)]
 pub struct Controller {
+    #[serde(skip_serializing)]
     pub pwm: Arc<Mutex<Pca9685<I2cdev>>>,
+    pub on: bool,
+    pub led: LED,
 }
 
 impl Controller {
@@ -21,6 +25,13 @@ impl Controller {
 
         Controller {
             pwm: Arc::new(Mutex::new(pwm)),
+            on: false,
+            led: LED {
+                white: 0,
+                red: 0,
+                green: 0,
+                blue: 0,
+            },
         }
     }
 
@@ -29,6 +40,7 @@ impl Controller {
     ) -> Result<(), pca9685::Error<hal::i2cdev::linux::LinuxI2CError>> {
         let mut pwm = self.pwm.lock().await;
         pwm.enable()?;
+        self.on = true;
         Ok(())
     }
     pub async fn disable(
@@ -36,17 +48,15 @@ impl Controller {
     ) -> Result<(), pca9685::Error<hal::i2cdev::linux::LinuxI2CError>> {
         let mut pwm = self.pwm.lock().await;
         pwm.disable()?;
+        self.on = false;
         Ok(())
     }
 
-    pub async fn apply(
-        &mut self,
-        led: LED,
-    ) -> Result<(), pca9685::Error<hal::i2cdev::linux::LinuxI2CError>> {
-        self.set_brightness(Color::White, led.white).await?;
-        self.set_brightness(Color::Red, led.red).await?;
-        self.set_brightness(Color::Green, led.green).await?;
-        self.set_brightness(Color::Blue, led.blue).await?;
+    pub async fn apply(&mut self) -> Result<(), pca9685::Error<hal::i2cdev::linux::LinuxI2CError>> {
+        self.set_brightness(Color::White, self.led.white).await?;
+        self.set_brightness(Color::Red, self.led.red).await?;
+        self.set_brightness(Color::Green, self.led.green).await?;
+        self.set_brightness(Color::Blue, self.led.blue).await?;
 
         Ok(())
     }

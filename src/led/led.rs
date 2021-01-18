@@ -7,7 +7,7 @@ pub enum Color {
     Blue,
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Clone, Deserialize, Serialize)]
 pub struct LED {
     pub white: u8,
     pub red: u8,
