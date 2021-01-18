@@ -1,4 +1,5 @@
 <script>
+  import { onMount } from "svelte";
   import { HsvPicker } from "svelte-color-picker";
   import Icon from "svelte-awesome";
   import { faPowerOff } from "@fortawesome/free-solid-svg-icons";
@@ -6,6 +7,21 @@
   let active = false;
   let lastColor = "#" + Math.floor(Math.random() * 16777215).toString(16);
   $: color = active ? color : "#181616";
+
+  onMount(() => {
+    fetch("/status", { method: "GET" })
+      .then((resp) => {
+        if (!resp.ok) {
+          alert(`Something wrong: ${resp.statusText} ${resp.status}`);
+        } else {
+          return resp.json();
+        }
+      })
+      .then((json) => {
+        active = json.on;
+        color = json.led;
+      });
+  });
 
   const handlePowerToggle = () => {
     active = !active;
@@ -53,6 +69,13 @@
   };
 </script>
 
+<main style="--color: {color}">
+  <div id="btn-bg" class:active on:click={handlePowerToggle}>
+    <Icon data={faPowerOff} scale="3" style="vertical-align: middle;" />
+  </div>
+  <HsvPicker on:colorChange={setBackgroundColor} startColor={lastColor} />
+</main>
+
 <style>
   main {
     text-align: center;
@@ -90,10 +113,3 @@
     border: 3px solid #61fc8c;
   }
 </style>
-
-<main style="--color: {color}">
-  <div id="btn-bg" class:active on:click={handlePowerToggle}>
-    <Icon data={faPowerOff} scale="3" style="vertical-align: middle;" />
-  </div>
-  <HsvPicker on:colorChange={setBackgroundColor} startColor={lastColor} />
-</main>

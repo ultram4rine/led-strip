@@ -27,6 +27,7 @@ async fn main() {
         username: admin_user,
         password: admin_pass,
     })
+    .or(status(controller.clone()))
     .or(enable(controller.clone()))
     .or(disable(controller.clone()))
     .or(set_color(controller.clone()))
@@ -45,6 +46,15 @@ fn login(
         .and(warp::body::json())
         .and(warp::any().map(move || admin.clone()))
         .and_then(auth)
+}
+
+fn status(
+    controller: Controller,
+) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
+    warp::path!("status")
+        .and(warp::get())
+        .and(warp::any().map(move || controller.clone()))
+        .and_then(get_status)
 }
 
 fn enable(
@@ -80,6 +90,10 @@ async fn auth(user: Credentials, admin: Credentials) -> Result<impl warp::Reply,
         true => return Ok(StatusCode::OK),
         false => return Ok(StatusCode::UNAUTHORIZED),
     }
+}
+
+async fn get_status(controller: Controller) -> Result<impl warp::Reply, Infallible> {
+    Ok(warp::reply::json(&controller))
 }
 
 async fn enable_led(mut controller: Controller) -> Result<impl warp::Reply, Infallible> {
