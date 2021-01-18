@@ -7,15 +7,15 @@
     "start": "sirv public"
   },
   "dependencies": {
-    "@fortawesome/free-solid-svg-icons": "^5.15.1",
-    "svelte": "^3.31.1",
+    "@fortawesome/free-solid-svg-icons": "^5.15.2",
+    "svelte": "^3.31.2",
     "svelte-awesome": "^2.3.0",
     "svelte-color-picker": "^1.0.7"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^17.0.0",
-    "@rollup/plugin-node-resolve": "^11.0.1",
-    "rollup": "^2.35.1",
+    "@rollup/plugin-node-resolve": "^11.1.0",
+    "rollup": "^2.36.2",
     "rollup-plugin-css-only": "^3.1.0",
     "rollup-plugin-livereload": "^2.0.0",
     "rollup-plugin-svelte": "^7.0.0",
