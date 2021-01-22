@@ -52,7 +52,11 @@ impl Controller {
         Ok(())
     }
 
-    pub async fn apply(&mut self) -> Result<(), pca9685::Error<hal::i2cdev::linux::LinuxI2CError>> {
+    pub async fn apply(
+        &mut self,
+        led: LED,
+    ) -> Result<(), pca9685::Error<hal::i2cdev::linux::LinuxI2CError>> {
+        self.led = led;
         self.set_brightness(Color::White, self.led.white).await?;
         self.set_brightness(Color::Red, self.led.red).await?;
         self.set_brightness(Color::Green, self.led.green).await?;
