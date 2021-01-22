@@ -14,10 +14,14 @@ RUN cargo build --release
 FROM node:15 as frontend
 
 WORKDIR ./ui
-COPY ./ui/package.json ./ui/package-lock.json ./
+COPY ./ui/package*.json ./
+
 RUN npm install
 
-COPY . .
+COPY ./ui/rollup.config.js ./
+COPY ./ui/src ./src
+COPY ./ui/public ./public
+
 RUN npm run build
 
 FROM debian:buster-slim
