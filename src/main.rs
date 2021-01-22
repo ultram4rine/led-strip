@@ -1,22 +1,17 @@
 #![deny(warnings)]
 #![allow(dead_code)]
 mod controller;
+mod handlers;
 mod led;
 
 use crate::controller::controller::Controller;
-use crate::led::led::LED;
-use serde::{Deserialize, Serialize};
-use std::convert::Infallible;
+use crate::handlers::handlers::{
+    apply_color, auth, disable_led, enable_led, get_status, Credentials,
+};
 use std::env;
 use std::sync::Arc;
 use tokio::sync::Mutex;
-use warp::{http::StatusCode, Filter};
-
-#[derive(Clone, Deserialize, Serialize)]
-struct Credentials {
-    username: String,
-    password: String,
-}
+use warp::Filter;
 
 #[tokio::main]
 async fn main() {
@@ -101,47 +96,4 @@ fn set_color(
         .and(warp::body::json())
         .and(with_controller(controller))
         .and_then(apply_color)
-}
-
-async fn auth(user: Credentials, admin: Credentials) -> Result<impl warp::Reply, Infallible> {
-    match user.username == admin.username && user.password == admin.password {
-        true => return Ok(StatusCode::OK),
-        false => return Ok(StatusCode::UNAUTHORIZED),
-    }
-}
-
-async fn get_status(controller: Arc<Mutex<Controller>>) -> Result<impl warp::Reply, Infallible> {
-    let c = controller.lock().await;
-    let state = c.clone();
-    Ok(warp::reply::json(&state))
-}
-
-async fn enable_led(controller: Arc<Mutex<Controller>>) -> Result<impl warp::Reply, Infallible> {
-    let mut c = controller.lock().await;
-    match c.enable().await {
-        Ok(()) => return Ok(StatusCode::OK),
-        Err(_) => return Ok(StatusCode::INTERNAL_SERVER_ERROR),
-    }
-}
-
-async fn disable_led(controller: Arc<Mutex<Controller>>) -> Result<impl warp::Reply, Infallible> {
-    let mut c = controller.lock().await;
-    match c.disable().await {
-        Ok(()) => return Ok(StatusCode::OK),
-        Err(_) => return Ok(StatusCode::INTERNAL_SERVER_ERROR),
-    }
-}
-
-async fn apply_color(
-    led: LED,
-    controller: Arc<Mutex<Controller>>,
-) -> Result<impl warp::Reply, Infallible> {
-    let mut c = controller.lock().await;
-    match c.apply(led).await {
-        Ok(()) => return Ok(StatusCode::OK),
-        Err(e) => {
-            println!("{:?}", e);
-            return Ok(StatusCode::INTERNAL_SERVER_ERROR);
-        }
-    };
 }
