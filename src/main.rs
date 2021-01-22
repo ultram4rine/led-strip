@@ -8,6 +8,8 @@ use crate::led::led::LED;
 use serde::{Deserialize, Serialize};
 use std::convert::Infallible;
 use std::env;
+use std::sync::Arc;
+use tokio::sync::Mutex;
 use warp::{http::StatusCode, Filter};
 
 #[derive(Clone, Deserialize, Serialize)]
@@ -18,24 +20,40 @@ struct Credentials {
 
 #[tokio::main]
 async fn main() {
-    let controller = Controller::new();
+    let controller = Arc::new(Mutex::new(Controller::new()));
 
     let admin_user = env::var("LED_USER").unwrap();
     let admin_pass = env::var("LED_PASS").unwrap();
 
-    let routes = login(Credentials {
-        username: admin_user,
-        password: admin_pass,
-    })
-    .or(status(controller.clone()))
-    .or(enable(controller.clone()))
-    .or(disable(controller.clone()))
-    .or(set_color(controller.clone()))
+    let api = api(
+        Credentials {
+            username: admin_user,
+            password: admin_pass,
+        },
+        controller,
+    )
     .with(warp::cors().allow_any_origin());
 
-    warp::serve(warp::fs::dir("ui/public").or(routes))
+    warp::serve(warp::fs::dir("ui/public").or(api))
         .run(([0, 0, 0, 0], 3030))
         .await;
+}
+
+fn api(
+    admin: Credentials,
+    controller: Arc<Mutex<Controller>>,
+) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
+    login(admin)
+        .or(status(controller.clone()))
+        .or(enable(controller.clone()))
+        .or(disable(controller.clone()))
+        .or(set_color(controller))
+}
+
+fn with_controller(
+    controller: Arc<Mutex<Controller>>,
+) -> impl Filter<Extract = (Arc<Mutex<Controller>>,), Error = std::convert::Infallible> + Clone {
+    warp::any().map(move || controller.clone())
 }
 
 fn login(
@@ -49,39 +67,39 @@ fn login(
 }
 
 fn status(
-    controller: Controller,
+    controller: Arc<Mutex<Controller>>,
 ) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
     warp::path!("status")
         .and(warp::get())
-        .and(warp::any().map(move || controller.clone()))
+        .and(with_controller(controller))
         .and_then(get_status)
 }
 
 fn enable(
-    controller: Controller,
+    controller: Arc<Mutex<Controller>>,
 ) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
     warp::path!("enable")
         .and(warp::post())
-        .and(warp::any().map(move || controller.clone()))
+        .and(with_controller(controller))
         .and_then(enable_led)
 }
 
 fn disable(
-    controller: Controller,
+    controller: Arc<Mutex<Controller>>,
 ) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
     warp::path!("disable")
         .and(warp::post())
-        .and(warp::any().map(move || controller.clone()))
+        .and(with_controller(controller))
         .and_then(disable_led)
 }
 
 fn set_color(
-    controller: Controller,
+    controller: Arc<Mutex<Controller>>,
 ) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
     warp::path!("color")
         .and(warp::post())
         .and(warp::body::json())
-        .and(warp::any().map(move || controller.clone()))
+        .and(with_controller(controller))
         .and_then(apply_color)
 }
 
@@ -92,28 +110,34 @@ async fn auth(user: Credentials, admin: Credentials) -> Result<impl warp::Reply,
     }
 }
 
-async fn get_status(controller: Controller) -> Result<impl warp::Reply, Infallible> {
-    Ok(warp::reply::json(&controller))
+async fn get_status(controller: Arc<Mutex<Controller>>) -> Result<impl warp::Reply, Infallible> {
+    let c = controller.lock().await;
+    let state = c.clone();
+    Ok(warp::reply::json(&state))
 }
 
-async fn enable_led(mut controller: Controller) -> Result<impl warp::Reply, Infallible> {
-    match controller.enable().await {
+async fn enable_led(controller: Arc<Mutex<Controller>>) -> Result<impl warp::Reply, Infallible> {
+    let mut c = controller.lock().await;
+    match c.enable().await {
         Ok(()) => return Ok(StatusCode::OK),
         Err(_) => return Ok(StatusCode::INTERNAL_SERVER_ERROR),
     }
 }
 
-async fn disable_led(mut controller: Controller) -> Result<impl warp::Reply, Infallible> {
-    match controller.disable().await {
+async fn disable_led(controller: Arc<Mutex<Controller>>) -> Result<impl warp::Reply, Infallible> {
+    let mut c = controller.lock().await;
+    match c.disable().await {
         Ok(()) => return Ok(StatusCode::OK),
         Err(_) => return Ok(StatusCode::INTERNAL_SERVER_ERROR),
     }
 }
 
-async fn apply_color(led: LED, mut controller: Controller) -> Result<impl warp::Reply, Infallible> {
-    controller.led = led;
-
-    match controller.apply().await {
+async fn apply_color(
+    led: LED,
+    controller: Arc<Mutex<Controller>>,
+) -> Result<impl warp::Reply, Infallible> {
+    let mut c = controller.lock().await;
+    match c.apply(led).await {
         Ok(()) => return Ok(StatusCode::OK),
         Err(e) => {
             println!("{:?}", e);
