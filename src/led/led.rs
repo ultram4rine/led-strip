@@ -7,7 +7,7 @@ pub enum Color {
     Blue,
 }
 
-#[derive(Clone, Deserialize, Serialize)]
+#[derive(Copy, Clone, Deserialize, Serialize)]
 pub struct LED {
     pub white: u8,
     pub red: u8,
@@ -16,12 +16,12 @@ pub struct LED {
 }
 
 impl LED {
-    pub fn new() -> Self {
+    pub fn new(white: u8, red: u8, green: u8, blue: u8) -> Self {
         LED {
-            white: 0,
-            red: 0,
-            green: 0,
-            blue: 0,
+            white: white,
+            red: red,
+            green: green,
+            blue: blue,
         }
     }
 

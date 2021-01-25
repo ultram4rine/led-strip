@@ -7,6 +7,7 @@ use pca9685::{Address, Channel, Pca9685};
 use serde::Serialize;
 use std::sync::Arc;
 use tokio::sync::Mutex;
+use tokio::time::{sleep, Duration};
 
 #[derive(Clone, Serialize)]
 pub struct Controller {
@@ -61,6 +62,24 @@ impl Controller {
         self.set_brightness(Color::Red, self.led.red).await?;
         self.set_brightness(Color::Green, self.led.green).await?;
         self.set_brightness(Color::Blue, self.led.blue).await?;
+
+        Ok(())
+    }
+
+    pub async fn twinkle(
+        &mut self,
+        led: LED,
+    ) -> Result<(), pca9685::Error<hal::i2cdev::linux::LinuxI2CError>> {
+        let current = self.led;
+
+        for _ in 1..=10 {
+            self.apply(LED::new(0, 0, 0, 0)).await?;
+            sleep(Duration::from_millis(300)).await;
+            self.apply(led).await?;
+            sleep(Duration::from_millis(300)).await;
+        }
+
+        self.apply(current).await?;
 
         Ok(())
     }

@@ -6,7 +6,7 @@ mod led;
 
 use crate::controller::controller::Controller;
 use crate::handlers::handlers::{
-    apply_color, auth, disable_led, enable_led, get_status, Credentials,
+    alert_mode, apply_color, auth, disable_led, enable_led, get_status, Credentials,
 };
 use std::env;
 use std::sync::Arc;
@@ -96,4 +96,14 @@ fn set_color(
         .and(warp::body::json())
         .and(with_controller(controller))
         .and_then(apply_color)
+}
+
+fn alert(
+    controller: Arc<Mutex<Controller>>,
+) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
+    warp::path!("alert")
+        .and(warp::post())
+        .and(warp::body::json())
+        .and(with_controller(controller))
+        .and_then(alert_mode)
 }
