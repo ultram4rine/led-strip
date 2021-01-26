@@ -42,7 +42,8 @@ fn api(
         .or(status(controller.clone()))
         .or(enable(controller.clone()))
         .or(disable(controller.clone()))
-        .or(set_color(controller))
+        .or(set_color(controller.clone()))
+        .or(alert(controller))
 }
 
 fn with_controller(
