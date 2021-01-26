@@ -75,7 +75,7 @@ pub async fn alert_mode(
     let color = match alert.status.as_str() {
         "firing" => LED::new(0, 255, 0, 0),
         "resolved" => LED::new(0, 0, 255, 0),
-        _ => LED::new(0, 0, 0, 255), // blue if it not 'firing' or 'resolved'.
+        _ => LED::new(0, 0, 0, 255), // blue if status not 'firing' or 'resolved'.
     };
 
     match c.twinkle(color).await {
