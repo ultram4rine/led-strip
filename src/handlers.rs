@@ -1,5 +1,5 @@
-use crate::controller::controller::Controller;
-use crate::led::led::LED;
+use crate::controller::Controller;
+use crate::led::LED;
 use serde::{Deserialize, Serialize};
 use std::convert::Infallible;
 use std::sync::Arc;

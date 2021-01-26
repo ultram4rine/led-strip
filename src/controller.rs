@@ -1,7 +1,7 @@
 extern crate linux_embedded_hal as hal;
 extern crate pwm_pca9685 as pca9685;
 
-use crate::led::led::{convert8to12, Color, LED};
+use crate::led::{convert8to12, Color, LED};
 use hal::I2cdev;
 use pca9685::{Address, Channel, Pca9685};
 use serde::Serialize;

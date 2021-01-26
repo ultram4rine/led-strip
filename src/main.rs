@@ -4,8 +4,8 @@ mod controller;
 mod handlers;
 mod led;
 
-use crate::controller::controller::Controller;
-use crate::handlers::handlers::{
+use crate::controller::Controller;
+use crate::handlers::{
     alert_mode, apply_color, auth, disable_led, enable_led, get_status, Credentials,
 };
 use std::env;
