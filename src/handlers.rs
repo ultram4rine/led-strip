@@ -37,7 +37,13 @@ pub async fn enable_led(
 ) -> Result<impl warp::Reply, Infallible> {
     let mut c = controller.lock().await;
     match c.enable().await {
-        Ok(()) => return Ok(StatusCode::OK),
+        Ok(()) => {
+            let led = c.led;
+            match c.apply(led).await {
+                Ok(()) => return Ok(StatusCode::OK),
+                Err(_) => return Ok(StatusCode::INTERNAL_SERVER_ERROR),
+            }
+        }
         Err(_) => return Ok(StatusCode::INTERNAL_SERVER_ERROR),
     }
 }
