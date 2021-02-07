@@ -6,7 +6,8 @@ mod led;
 
 use crate::controller::Controller;
 use crate::handlers::{
-    alert_mode, apply_color, auth, disable_led, enable_led, get_status, Credentials,
+    alert_mode, apply_brightness, apply_color, auth, disable_led, enable_led, get_status,
+    Credentials,
 };
 use std::env;
 use std::sync::Arc;
@@ -42,6 +43,7 @@ fn api(
         .or(status(controller.clone()))
         .or(enable(controller.clone()))
         .or(disable(controller.clone()))
+        .or(set_brightness(controller.clone()))
         .or(set_color(controller.clone()))
         .or(alert(controller))
 }
@@ -87,6 +89,16 @@ fn disable(
         .and(warp::post())
         .and(with_controller(controller))
         .and_then(disable_led)
+}
+
+fn set_brightness(
+    controller: Arc<Mutex<Controller>>,
+) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
+    warp::path!("brightness")
+        .and(warp::post())
+        .and(warp::body::json())
+        .and(with_controller(controller))
+        .and_then(apply_brightness)
 }
 
 fn set_color(

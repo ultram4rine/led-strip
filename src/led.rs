@@ -1,45 +1,33 @@
 use serde::{Deserialize, Serialize};
 
 pub enum Color {
-    White,
     Red,
     Green,
     Blue,
 }
 
 #[derive(Copy, Clone, Deserialize, Serialize)]
-pub struct LED {
-    pub white: u8,
+pub struct RGB {
     pub red: u8,
     pub green: u8,
     pub blue: u8,
 }
 
+#[derive(Copy, Clone, Deserialize, Serialize)]
+pub struct LED {
+    pub white: u16,
+    pub color: RGB,
+}
+
 impl LED {
-    pub fn new(white: u8, red: u8, green: u8, blue: u8) -> Self {
+    pub fn new(white: u16, red: u8, green: u8, blue: u8) -> Self {
         LED {
             white: white,
-            red: red,
-            green: green,
-            blue: blue,
-        }
-    }
-
-    pub fn set_brightness(&mut self, color: Color, val: u8) {
-        match color {
-            Color::White => self.white = val,
-            Color::Red => self.red = val,
-            Color::Green => self.green = val,
-            Color::Blue => self.blue = val,
-        }
-    }
-
-    pub fn get_brightness(&mut self, color: Color) -> u8 {
-        match color {
-            Color::White => self.white,
-            Color::Red => self.red,
-            Color::Green => self.green,
-            Color::Blue => self.blue,
+            color: RGB {
+                red: red,
+                green: green,
+                blue: blue,
+            },
         }
     }
 }

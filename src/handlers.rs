@@ -1,5 +1,5 @@
 use crate::controller::Controller;
-use crate::led::LED;
+use crate::led::{LED, RGB};
 use serde::{Deserialize, Serialize};
 use std::convert::Infallible;
 use std::sync::Arc;
@@ -45,7 +45,7 @@ pub async fn enable_led(
             }
         }
         Err(_) => return Ok(StatusCode::INTERNAL_SERVER_ERROR),
-    }
+    };
 }
 
 pub async fn disable_led(
@@ -55,15 +55,29 @@ pub async fn disable_led(
     match c.disable().await {
         Ok(()) => return Ok(StatusCode::OK),
         Err(_) => return Ok(StatusCode::INTERNAL_SERVER_ERROR),
-    }
+    };
 }
 
-pub async fn apply_color(
-    led: LED,
+pub async fn apply_brightness(
+    val: u16,
     controller: Arc<Mutex<Controller>>,
 ) -> Result<impl warp::Reply, Infallible> {
     let mut c = controller.lock().await;
-    match c.apply(led).await {
+    match c.set_brightness(val).await {
+        Ok(()) => return Ok(StatusCode::OK),
+        Err(e) => {
+            println!("{:?}", e);
+            return Ok(StatusCode::INTERNAL_SERVER_ERROR);
+        }
+    };
+}
+
+pub async fn apply_color(
+    color: RGB,
+    controller: Arc<Mutex<Controller>>,
+) -> Result<impl warp::Reply, Infallible> {
+    let mut c = controller.lock().await;
+    match c.set_color(color).await {
         Ok(()) => return Ok(StatusCode::OK),
         Err(e) => {
             println!("{:?}", e);
@@ -90,5 +104,5 @@ pub async fn alert_mode(
             println!("{:?}", e);
             return Ok(StatusCode::INTERNAL_SERVER_ERROR);
         }
-    }
+    };
 }
