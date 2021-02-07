@@ -4,67 +4,34 @@
   import Icon from "svelte-awesome";
   import { faPowerOff } from "@fortawesome/free-solid-svg-icons";
 
+  import { getStatus, enable, disable, setBrightness, setColor } from "./api";
+
   let active = false;
   let lastColor = "#" + Math.floor(Math.random() * 16777215).toString(16);
   $: color = active ? color : "#181616";
 
   onMount(() => {
-    fetch("/status", { method: "GET" })
-      .then((resp) => {
-        if (!resp.ok) {
-          alert(`Something wrong: ${resp.statusText} ${resp.status}`);
-        } else {
-          return resp.json();
-        }
-      })
-      .then((json) => {
-        active = json.on;
-        color = json.led;
-      });
+    getStatus().then((json) => {
+      active = json.on;
+      color = json.color;
+    });
   });
 
   const handlePowerToggle = () => {
     active = !active;
     if (!active) {
       lastColor = color;
-      fetch("/disable", {
-        method: "POST",
-      }).then((resp) => {
-        if (!resp.ok) {
-          alert(`Something wrong: ${resp.statusText} ${resp.status}`);
-        }
-      });
+      disable();
     } else {
       color = lastColor;
-      fetch("/enable", {
-        method: "POST",
-      }).then((resp) => {
-        if (!resp.ok) {
-          alert(`Something wrong: ${resp.statusText} ${resp.status}`);
-        }
-      });
+      enable();
     }
   };
 
   const setBackgroundColor = (rgba) => {
-    color = `rgba(${rgba.detail.r}, ${rgba.detail.g}, ${rgba.detail.b}, ${rgba.detail.a})`;
+    color = `rgb(${rgba.detail.r}, ${rgba.detail.g}, ${rgba.detail.b})`;
     if (active) {
-      fetch("/color", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          white: rgba.detail.a,
-          red: rgba.detail.r,
-          green: rgba.detail.g,
-          blue: rgba.detail.b,
-        }),
-      }).then((resp) => {
-        if (!resp.ok) {
-          alert(`Something wrong: ${resp.statusText} ${resp.status}`);
-        }
-      });
+      setColor(rgba);
     }
   };
 </script>
