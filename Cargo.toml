@@ -9,7 +9,7 @@ edition = "2018"
 [dependencies]
 pwm-pca9685 = "0.3.0"
 linux-embedded-hal = "0.3.0"
-tokio = { version = "1.2", features = ["macros", "rt-multi-thread"] }
+tokio = { version = "1.4", features = ["macros", "rt-multi-thread"] }
 warp = "0.3"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
