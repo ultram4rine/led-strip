@@ -8,7 +8,7 @@ edition = "2018"
 
 [dependencies]
 pwm-pca9685 = "0.3.0"
-linux-embedded-hal = "0.3.0"
+linux-embedded-hal = "0.3.2"
 tokio = { version = "1.5", features = ["macros", "rt-multi-thread"] }
 warp = "0.3"
 serde = { version = "1.0", features = ["derive"] }
